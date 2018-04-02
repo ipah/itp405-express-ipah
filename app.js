@@ -5,6 +5,7 @@ const app = express();
 
 //routes
 const Genre  = require('./models/Genre');
+const Track = require('./models/Track');
 
 app.get('/v2/genres', function(request, response){
 	Genre.fetchAll().then(function(genres){
@@ -15,6 +16,7 @@ app.get('/v2/genres', function(request, response){
 app.get('/v2/genres/:id', function(request, response){
 	let id = request.params.id;
 	let genre = new Genre({GenreId: id});
+	console.log(genre);
 	genre.fetch().then(function(genre){
 		if(!genre){
 			response.status(404).json({
@@ -24,12 +26,40 @@ app.get('/v2/genres/:id', function(request, response){
 
 		else{
 			response.json(genre);
+
 		}
 		
 	})
 })
 
 
+app.get('/delete/tracks/:id', function(request, response){
+	let id = request.params.id;
+	let track = new Track({TrackId: id});
+	//console.log(track.fetch());
+	track.fetch().then(function(track){
+		console.log(track);
+		if(!track){
+			response.status(404).json({
+				error: `Track ${id} not found`
+			})
+		}
+		else{
+
+			track.destroy().then(function(){
+				response.status(204).json({
+					
+				})
+
+			}).catch(function(err){
+
+			})
+
+		}
+	})
+
+	
+});
 
 app.get('/genres', function(request, response){
 	let connection =  connect();
@@ -91,6 +121,7 @@ app.get('/api/artists/filter=:filter?', function(request, response){
 		response.json({error: 'error'});
 	});
 });
+
 
 const port = process.env.PORT || 8000; //use heroku's port if available (if launched) or use 8000
 
